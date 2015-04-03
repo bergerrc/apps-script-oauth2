@@ -72,11 +72,11 @@ Service_.prototype.setTokenFormat = function(tokenFormat) {
 /**
  * Sets the project key of the script that contains the authorization callback function (required).
  * The project key can be found in the Script Editor UI under "File > Project properties".
- * @param {string} projectKey The project key of the project containing the callback function.
+ * @param {string} redirectUri The Url of the project to callback after authorization
  * @return {Service_} This service, for chaining.
  */
-Service_.prototype.setProjectKey = function(projectKey) {
-  this.projectKey_ = projectKey;
+Service_.prototype.setRedirectUri = function(redirectUri) {
+  this.redirectUri_ = redirectUri;
   return this;
 };
 
@@ -181,12 +181,11 @@ Service_.prototype.setParam = function(name, value) {
 Service_.prototype.getAuthorizationUrl = function() {
   validate_({
     'Client ID': this.clientId_,
-    'Project key': this.projectKey_,
+    'Redirect Uri': this.redirectUri_,
     'Callback function name': this.callbackFunctionName_,
     'Authorization base URL': this.authorizationBaseUrl_
   });
 
-  var redirectUri = getRedirectUri(this.projectKey_);
   var state = ScriptApp.newStateToken()
       .withMethod(this.callbackFunctionName_)
       .withArgument('serviceName', this.serviceName_)
@@ -195,7 +194,7 @@ Service_.prototype.getAuthorizationUrl = function() {
   var params = {
     client_id: this.clientId_,
     response_type: 'code',
-    redirect_uri: redirectUri,
+    redirect_uri: this.redirectUri_,
     state: state
   };
   params = _.extend(params, this.params_);
@@ -220,10 +219,10 @@ Service_.prototype.handleCallback = function(callbackRequest) {
   validate_({
     'Client ID': this.clientId_,
     'Client Secret': this.clientSecret_,
-    'Project key': this.projectKey_,
+    'Redirect Uri': this.redirectUri_,
     'Token URL': this.tokenUrl_
   });
-  var redirectUri = getRedirectUri(this.projectKey_);
+
   var response = UrlFetchApp.fetch(this.tokenUrl_, {
     method: 'post',
     headers: {
@@ -233,7 +232,7 @@ Service_.prototype.handleCallback = function(callbackRequest) {
       code: code,
       client_id: this.clientId_,
       client_secret: this.clientSecret_,
-      redirect_uri: redirectUri,
+      redirect_uri: this.redirectUri_,
       grant_type: 'authorization_code'
     },
     muteHttpExceptions: true
