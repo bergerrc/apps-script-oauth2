@@ -40,14 +40,3 @@ var TOKEN_FORMAT = {
 function createService(serviceName) {
   return new Service_(serviceName);
 }
-
-/**
- * Returns the redirect URI that will be used for a given script. Often this URI
- * needs to be entered into a configuration screen of your OAuth provider.
- * @param {string} projectKey The project key of your script, which can be found in
- *     the Script Editor UI under "File > Project properties".
- * @return {string} The redirect URI.
- */
-function getRedirectUri(projectKey) {
-  return Utilities.formatString('https://script.google.com/macros/d/%s/usercallback', projectKey);
-}
